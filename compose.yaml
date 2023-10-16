@@ -1,19 +1,20 @@
-name: react-rust-postgres
+version: '3'
+
 services:
-  frontend:
+  client:
     build:
-      context: frontend
+      context: client
       target: development
     networks:
-      - client-side
+      - client
     ports:
       - 3000:3000
     volumes:
-      - ./frontend/src:/code/src:ro
+      - ./client/src:/code/src:ro
 
-  backend:
+  server:
     build:
-      context: backend
+      context: server
       target: development
     environment:
       - ADDRESS=0.0.0.0:8000
@@ -22,12 +23,14 @@ services:
       - PG_HOST=db
       - PG_USER=postgres
       - PG_PASSWORD=mysecretpassword
+    ports:
+      - 8000:8000
     networks:
-      - client-side
-      - server-side
+      - client
+      - server
     volumes:
-      - ./backend/src:/code/src
-      - backend-cache:/code/target
+      - ./server/src:/code/src
+      - server-cache:/code/target
     depends_on:
       - db
 
@@ -37,16 +40,16 @@ services:
     environment:
       - POSTGRES_PASSWORD=mysecretpassword
     networks:
-      - server-side
+      - server
     ports:
       - 5432:5432
     volumes:
       - db-data:/var/lib/postgresql/data
 
 networks:
-  client-side: {}
-  server-side: {}
+  client: {}
+  server: {}
 
 volumes:
-  backend-cache: {}
+  server-cache: {}
   db-data: {}
