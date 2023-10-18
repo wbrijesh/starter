@@ -1,21 +1,17 @@
-use axum::{response::IntoResponse, routing::get, Json, Router};
+mod handlers;
 
-async fn health_checker_handler() -> impl IntoResponse {
-    let json_response = serde_json::json!({
-        "message": "hello"
-    });
+use handlers::{hello, manual_hello};
 
-    Json(json_response)
+use actix_web::{web, App, HttpServer};
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new()
+            .service(hello)
+            .route("/hey", web::get().to(manual_hello))
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }
-
-#[tokio::main]
-async fn main() {
-    let app = Router::new().route("/", get(health_checker_handler));
-
-    println!("🚀 Server started successfully");
-    axum::Server::bind(&"0.0.0.0:8000".parse().unwrap())
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
-}
-
